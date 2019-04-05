@@ -5,6 +5,10 @@ date: "`r format(Sys.Date())`"
 output: github_document
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
 ## Petites astuces
 
 Le YAML (ci-dessus), c'est l'information qui permettra d'exporter le document.
@@ -60,20 +64,112 @@ Les données du fichier `hawai.csv` comprennent les moyennes des mesures mensuel
 Votre travail consiste à :
 
 1. créer une série temporelle du CO2 à partir des données de hawai.csv
+
 2. séparer la série en parties d'entraînement (environ 70% des données) et en partie test
+
 3. créer un modèle ETS sur les données d'entraînement, puis projeter la prévision de CO2 atmosphérique pour comparer aux données test
+
 4. effectuer une analyse des résidus
+
 5. commenter: le modèle est-il fiable ? Comment pourrait-il être amélioré ?
 
 Vous devez me remettre un lien vers un répertoire git de votre choix (GitHub, GitLab, etc.) comprenant un code reproductible de votre démarche en format R-markdown.
 
+## Prediction avec des séries temporelles
 
-
-
-
-
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r}
+str(hawai)
 ```
+
+## Résolution
+### 1. créer une série temporelle du CO2 à partir des données de hawai.csv
+
+La fonction `read_csv()` n'a pas reconnu la variable `time` directement comme une date mais plutôt une variable numérique. Il faut alors pouvoir passer à une variable sous forme de date. 
+
+Le format `ts` pour `time series` permis par la fonction `ts()` du package `lubridate` n'a pas besoin du format de date. On ne garde que le vecteur ou la matrice temporelle `(excluant la date: time)`, on spécifie l'unité temporelle (l'année) et la sous-unité (le mois) de départ (ici l'année), puis à spécifier combien il y a de sous-unité par unité. La série temporelle `hawai_ts` est:
+
+```{r}
+hawai_ts <- ts(hawai$CO2,         # le vecteur (cible)
+                start = c(1958, 3), # départ au 3ième mois de 1958
+                freq = 12)          # nombre de sous-unités par an freq = 12
+sample(hawai_ts, 10)
+```
+
+### 2. séparer la série en parties d'entraînement (environ 70% des données) et en partie test
+
+```{r}
+hawai$time[round(0.7*nrow(hawai))]-1/365.25
+```
+
+```{r}
+hawai$time[round(0.7*nrow(hawai))]-1/365.25
+```
+
+
+
+```{r}
+hawai_ts_train <- window(hawai_ts, 
+                         start = 1958, 
+                         end = hawai$time[round(0.7*nrow(hawai))]-1/365.25,
+                         freq = 12)
+hawai_ts_test <- window(hawai_ts, 
+                        start = hawai$time[round(0.7*nrow(hawai))],
+                        freq = 12)
+```
+
+```{r}
+hawai_ts_train
+```
+
+
+```{r}
+hawai_ts_test
+```
+
+### 3.1 Créer un modèle ETS sur les données d'entraînement
+On peut laisser R optimiser le choix avec un modèle avec ETS (`error, tend and seasonnal`). L’optimisation est lancée avec la fonction `ets()` du module `forecast`.
+
+```{r}
+library(forecast)
+```
+
+```{r}
+hawai_ets <- hawai_ts_train %>%
+                  ets() %>%         # enregistre le modèle
+                  forecast()        # affiche la composante prévisionnelle
+hawai_ets %>% 
+  autoplot()
+```
+
+```{r}
+hawai_ets$model$par
+```
+
+
+
+```{r}
+hawai_ets %>% 
+  checkresiduals()
+```
+
+La p-value du `Ljung-Box test` montre qu'il y a des tendances dans les données.
+
+### 3.2 Projeter la prévision de CO2 atmosphérique pour comparer aux données test
+
+Les données test partent du mois d'octobre 1988 au mois de décembre 2001 soit 13 périodes de 12 mois plus 3 mois. Faisons la projection sur 13 périodes de 12 mois (`12*13`).
+
+```{r}
+hawai_ets <- hawai_ts_train %>%
+                  ets() %>% 
+                  forecast(h = 12*13)
+hawai_ets %>% 
+  autoplot()
+```
+
+
+
+
+
+
+
 
