@@ -26,7 +26,7 @@ L'Équation dans le paragraphe est *c*<sup>2</sup> = *a*<sup>2</sup> + *
 
 -   `{r, filtre-outliers}` donne le nom `filtre-outliers` au bloc de code, qui permet nommément de nommer les images créer dans le bloc de code.
 
--   `{r, eval = FALSE}` permet d’activer (`TRUE`, valeur par défaut) ou de désactiver (`FALSE`) le calcul de la cellule.
+-   `{r, eval = FALSE, include = FALSE}` permet d’activer (`TRUE`, valeur par défaut) ou de désactiver (`FALSE`) le calcul de la cellule, puis inclure ou ne pas inclure ...
 
 -   `{r, echo = FALSE}` permet de n’afficher que la sortie de la cellule de code en n’affichant pas le code, par exemple un graphique ou le sommaire d’une régression.
 
@@ -38,7 +38,7 @@ L'Équation dans le paragraphe est *c*<sup>2</sup> = *a*<sup>2</sup> + *
 
 On peut également exécuter rapidement du code sur une ligne avec la formulation `r`, par exemple la moyenne des nombres `\r a<-round(runif(4, 0, 10)); a` est de `\r mean(a)`, en enlevant les `\` devant les r (ajoutées artificiellement pour éviter que le code soit calculé) sera la moyenne des nombres 7, 2, 2, 8 est de 4.75
 
-La moyenne des nombres 4, 2, 9, 4 est de 4.75.
+La moyenne des nombres 3, 1, 9, 5 est de 4.5.
 
 Charger le fichier de travail
 -----------------------------
