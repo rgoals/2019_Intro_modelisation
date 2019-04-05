@@ -3,28 +3,28 @@ Introduction à la plateforme GitHub
 zcoulibali
 2019-04-05
 
-Petites astuces
----------------
+Petites astuces pour la pratique
+--------------------------------
 
-Le YAML (ci-dessus), c'est l'information qui permettra d'exporter le document.
+Le YAML en haut dans le code Marckdown, est l'information qui permettra d'exporter le document.
 
 Mettre du texte en *italique*.
 
 Ce texte est en **gras**.
 
-L'ordre des titres selon le nombre de carrés.
+Comment formater les titres selon le nombre de carrés.
 
 Texte en `largeur fixe`.
 
-Insérrer un bloc de code `ctrl+alt+i`.
+Insérrer rapidement un bloc de code `ctrl+alt+i`.
 
-Insérrer une équation seule, l'encadrer par 2$ avant et 2$ après. Dans un paragraphe, seulement par un $. Les équation utilise le `Latin`:
+Insérrer une équation comme paragraphe : l'encadrer par 2$ avant et 2$ après. Mais à l'intérieur du paragraphe, seulement par un $ de part et d'autre. Les équations utilise le `Latin`.
 
 $$ \\alpha = \\frac{a}{b^2} $$
 
-L'Équation dans le paragraphe est *c*<sup>2</sup> = *a*<sup>2</sup> + *b*<sup>3</sup> et c'est même très beau à voir. La racine carrée est donc $\\sqrt{a^2 + b^3}$.
+Juste pour tenter par moi-même une équation dans le paragraphe, écrivons *c*<sup>2</sup> = *a*<sup>2</sup> + *b*<sup>3</sup>. Géniale !. La racine carrée s'écrit $\\sqrt{a^2 + b^3}$.
 
--   `{r, filtre-outliers}` donne le nom `filtre-outliers` au bloc de code, qui permet nommément de nommer les images créer dans le bloc de code.
+Des codes utiles : - `{r, filtre-outliers}` donne le nom `filtre-outliers` au bloc de code, qui permet nommément de nommer les images créer dans le bloc de code.
 
 -   `{r, eval = FALSE, include = FALSE}` permet d’activer (`TRUE`, valeur par défaut) ou de désactiver (`FALSE`) le calcul de la cellule, puis inclure ou ne pas inclure ...
 
@@ -36,12 +36,16 @@ L'Équation dans le paragraphe est *c*<sup>2</sup> = *a*<sup>2</sup> + *
 
 -   `{r, fig.width = 10, fig.height = 5, fig.align = "center"}` affichera les graphiques dans les dimensions voulues, alignée au centre (`"center"`), à gauche (`"left"`) ou à droite (`"right"`).
 
-On peut également exécuter rapidement du code sur une ligne avec la formulation `r`, par exemple la moyenne des nombres `\r a<-round(runif(4, 0, 10)); a` est de `\r mean(a)`, en enlevant les `\` devant les r (ajoutées artificiellement pour éviter que le code soit calculé) sera la moyenne des nombres 7, 2, 2, 8 est de 4.75
+Mais se référer de préférence à l'[aide-mémoire](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet) Marckdown pour plus de détails ou le langage Marckdown [ici](https://daringfireball.net/projects/markdown/basics).
 
-La moyenne des nombres 3, 6, 8, 8 est de 6.25.
+On peut également exécuter rapidement du code sur une ligne avec la formulation `r`, par exemple la moyenne des nombres `\r a<-round(runif(4, 0, 10)); a` est de `\r mean(a)`, en enlevant les `\` devant les r (ajoutées artificiellement pour éviter que le code soit calculé) qui affichera en sortie :
+
+La moyenne des nombres 10, 8, 10, 8 est de 9.
 
 Charger le fichier de travail
 -----------------------------
+
+Après toutes ces digressions personnelle pour implémenter certains aspects fascinants de cet interface, je reviens aux moutons à l'ordre du jour. Chargeons les données à étudier.
 
 ``` r
 library(tidyverse)
@@ -71,12 +75,12 @@ hawai <- read_csv("hawai.csv")
 Directives de l’évaluation
 --------------------------
 
-Les données du fichier `hawai.csv` comprennent les moyennes des mesures mensuelles de **CO2 atmosphérique** en ppm-volume collectées au Mauna Loa Observatory à Hawaii de mars 1958 à juillet 2001, inclusivement.
+Les données du fichier `hawai.csv` comprennent les moyennes des mesures mensuelles de **CO2 atmosphérique** en ppm-volume collectées au Mauna-Loa Observatory à Hawaii de mars 1958 à juillet 2001, inclusivement.
 
-Trvail à faire
---------------
+Travail à faire
+---------------
 
-Votre travail consiste à :
+Le travail consiste à :
 
 1.  créer une série temporelle du CO2 à partir des données de hawai.csv
 
@@ -86,12 +90,16 @@ Votre travail consiste à :
 
 4.  effectuer une analyse des résidus
 
-5.  commenter: le modèle est-il fiable ? Comment pourrait-il être amélioré ?
+5.  commenter : le modèle est-il fiable ? Comment pourrait-il être amélioré ?
 
-Vous devez me remettre un lien vers un répertoire git de votre choix (GitHub, GitLab, etc.) comprenant un code reproductible de votre démarche en format R-markdown.
+Enfin, le travail est remis sous forme de lien vers un répertoire git (GitHub, GitLab, etc.) comprenant un code reproductible de votre démarche en format R-markdown.
 
-Prediction avec des séries temporelles
---------------------------------------
+Résolution
+----------
+
+### 1. Créer une série temporelle du CO2 à partir des données de hawai.csv
+
+Exploration des données :
 
 ``` r
 str(hawai)
@@ -106,14 +114,17 @@ str(hawai)
     ##   ..   CO2 = col_double()
     ##   .. )
 
-Résolution
-----------
+La fonction `read_csv()` n'a pas reconnu la variable `time` directement comme une date mais plutôt une variable numérique. On serait tenté de la transformer en format date. Mais la fonction `ts()` du module `lubridate`, qui crée un objet de classe `ts`, n'a pas forcément besoin du format date.
 
-### 1. Créer une série temporelle du CO2 à partir des données de hawai.csv
+``` r
+library(forecast)
+```
 
-La fonction `read_csv()` n'a pas reconnu la variable `time` directement comme une date mais plutôt une variable numérique. Il faut alors pouvoir passer à une variable sous forme de date.
+    ## Warning: package 'forecast' was built under R version 3.5.3
 
-Le format `ts` pour `time series` permis par la fonction `ts()` du package `lubridate` n'a pas besoin du format de date. On ne garde que le vecteur ou la matrice temporelle `(excluant la date: time)`, on spécifie l'unité temporelle (l'année) et la sous-unité (le mois) de départ (ici l'année), puis à spécifier combien il y a de sous-unité par unité. La série temporelle `hawai_ts` est:
+Il faut garder que le vecteur ou la matrice temporelle `(excluant la date: time)` puis spécifier l'unité temporelle (ici l'année) et la sous-unité (le mois) de départ, et combien il y a de sous-unités par unité temporelle (ici 12 mois).
+
+La série temporelle `hawai_ts` devient :
 
 ``` r
 hawai_ts <- ts(hawai$CO2,         # le vecteur (cible)
@@ -122,40 +133,15 @@ hawai_ts <- ts(hawai$CO2,         # le vecteur (cible)
 sample(hawai_ts, 10)
 ```
 
-    ##  [1] 346.825 350.080 337.950 355.360 336.675 354.060 331.500 358.900
-    ##  [9] 322.100 355.350
+    ##  [1] 330.000 322.100 336.600 354.140 324.825 340.020 357.575 331.800
+    ##  [9] 320.450 321.320
 
 ### 2. Séparer la série en parties d'entraînement (environ 70% des données) et en partie test
 
-``` r
-hawai$time[round(0.7*nrow(hawai))]-1/365.25
-```
-
-    ## [1] 1988.747
+Après une exploration du dataframe, la série commence en mars 1958 et termine en décembre 2001. Voyons s'il peut être affiché entièrement :
 
 ``` r
-hawai$time[round(0.7*nrow(hawai))]-1/365.25
-```
-
-    ## [1] 1988.747
-
-``` r
-hawai_ts_train <- window(hawai_ts, 
-                         start = 1958, 
-                         end = hawai$time[round(0.7*nrow(hawai))]-1/365.25,
-                         freq = 12)
-```
-
-    ## Warning in window.default(x, ...): 'start' value not changed
-
-``` r
-hawai_ts_test <- window(hawai_ts, 
-                        start = hawai$time[round(0.7*nrow(hawai))],
-                        freq = 12)
-```
-
-``` r
-hawai_ts_train
+hawai_ts
 ```
 
     ##           Jan      Feb      Mar      Apr      May      Jun      Jul
@@ -190,6 +176,19 @@ hawai_ts_train
     ## 1986 346.2500 346.8250 347.7400 349.5250 350.0800 349.3750 347.8250
     ## 1987 348.0000 348.5000 349.4750 350.8500 351.7400 351.1500 349.4500
     ## 1988 350.4000 351.7750 352.1250 353.5800 354.1750 353.7500 352.2200
+    ## 1989 352.7750 353.0000 353.6000 355.3600 355.6000 355.1250 353.8600
+    ## 1990 353.6500 354.6500 355.4800 356.1750 357.0750 356.0800 354.6750
+    ## 1991 354.6750 355.6500 357.2000 358.6000 359.2500 358.1800 356.0500
+    ## 1992 355.9000 356.6800 357.9000 359.0750 359.5400 359.1250 357.0000
+    ## 1993 356.6800 357.1750 358.4250 359.3250 360.1800 359.5000 357.4200
+    ## 1994 358.3200 358.9000 359.9250 361.2200 361.6500 360.9000 359.4600
+    ## 1995 359.9750 360.9250 361.5750 363.3600 363.7000 363.2500 361.8000
+    ## 1996 362.0250 363.1750 364.0600 364.7000 365.3250 364.8800 363.4750
+    ## 1997 363.1250 363.8750 364.5600 366.3250 366.6800 365.4750 364.3750
+    ## 1998 365.3400 366.2000 367.3750 368.5250 369.1400 368.7500 367.6000
+    ## 1999 368.1200 368.8500 369.6000 370.9750 370.8400 370.2500 369.0000
+    ## 2000 369.0200 369.3750 370.4000 371.5400 371.6500 371.6250 369.9400
+    ## 2001 370.1750 371.3250 372.0600 372.7750 373.8000 373.0600 371.3000
     ##           Aug      Sep      Oct      Nov      Dec
     ## 1958 314.9500 313.5000 313.5000 313.4250 314.7000
     ## 1959 314.9000 313.8250 313.4000 314.8750 315.5250
@@ -221,14 +220,70 @@ hawai_ts_train
     ## 1985 344.3000 343.0000 342.8000 344.2200 345.5750
     ## 1986 345.8200 344.8000 344.1000 345.6200 346.8750
     ## 1987 348.0800 346.4000 346.4400 347.9250 348.9250
-    ## 1988 350.3000 348.7500
+    ## 1988 350.3000 348.7500 348.9600 350.0000 351.3600
+    ## 1989 351.5750 349.8600 350.0500 351.2000 352.4800
+    ## 1990 352.9000 350.9400 351.2250 352.7000 354.1400
+    ## 1991 353.8600 352.1250 352.2500 353.7400 355.0250
+    ## 1992 354.8600 353.0250 353.4200 354.2000 355.3500
+    ## 1993 355.3250 353.7750 354.0600 355.3500 356.7750
+    ## 1994 357.3750 355.9250 356.0200 357.5750 359.0600
+    ## 1995 359.3750 358.0000 357.8500 359.4750 360.7000
+    ## 1996 361.3200 359.4000 359.6250 360.7400 362.3750
+    ## 1997 362.4600 360.1500 360.7500 362.3800 364.2500
+    ## 1998 365.7200 363.9250 364.3200 365.5500 366.9250
+    ## 1999 366.7000 364.6750 365.1400 366.6500 367.9000
+    ## 2000 367.9500 366.5400 366.7250 368.1250 369.4400
+    ## 2001 369.4250 367.8800 368.0500 369.3750 371.0200
+
+Tentons ce code pour trouver l'année et le mois où le partitionnement en Train et Test sets devrait s'arrêter :
+
+``` r
+hawai$time[round(0.7*nrow(hawai))]
+```
+
+    ## [1] 1988.75
+
+Ce qui correspond au mois de septembre 1988. Nous pouvons partitionner en utilisant cette date comme ci-dessous :
+
+``` r
+hawai_ts_train1 <- window(hawai_ts, 
+                         start = 1958, 
+                         end = hawai$time[round(0.7*nrow(hawai))],
+                         freq = 12)
+```
+
+    ## Warning in window.default(x, ...): 'start' value not changed
+
+``` r
+hawai_ts_test1 <- window(hawai_ts, 
+                        start = hawai$time[round(0.7*nrow(hawai))],
+                        freq = 12)
+```
+
+Ou bien partitionner jusqu'en décembre 1988 (3 mois de plus), juste pour que les données Test restent sur 12\*13 (13 périodes de 12 mois). Y'aurait-il autre moyen de pouvoir appeler les 3 mois restant dans le `forecast(h= ...)` ? J'ai opté de les ajouter aux données d'entraînement.
+
+``` r
+hawai_ts_train <- window(hawai_ts, 
+                         start = 1958, 
+                         end = 1988,
+                         freq = 12)
+```
+
+    ## Warning in window.default(x, ...): 'start' value not changed
+
+``` r
+hawai_ts_test <- window(hawai_ts, 
+                        start = 1989,
+                        freq = 12)
+```
+
+On pourrait visualiser le succès du partitionnement en appelant par exemple les données Test :
 
 ``` r
 hawai_ts_test
 ```
 
     ##          Jan     Feb     Mar     Apr     May     Jun     Jul     Aug
-    ## 1988                                                                
     ## 1989 352.775 353.000 353.600 355.360 355.600 355.125 353.860 351.575
     ## 1990 353.650 354.650 355.480 356.175 357.075 356.080 354.675 352.900
     ## 1991 354.675 355.650 357.200 358.600 359.250 358.180 356.050 353.860
@@ -243,7 +298,6 @@ hawai_ts_test
     ## 2000 369.020 369.375 370.400 371.540 371.650 371.625 369.940 367.950
     ## 2001 370.175 371.325 372.060 372.775 373.800 373.060 371.300 369.425
     ##          Sep     Oct     Nov     Dec
-    ## 1988         348.960 350.000 351.360
     ## 1989 349.860 350.050 351.200 352.480
     ## 1990 350.940 351.225 352.700 354.140
     ## 1991 352.125 352.250 353.740 355.025
@@ -260,50 +314,58 @@ hawai_ts_test
 
 ### 3.1 Créer un modèle ETS sur les données d'entraînement
 
-On peut laisser R optimiser le choix avec un modèle avec ETS (`error, tend and seasonnal`). L’optimisation est lancée avec la fonction `ets()` du module `forecast`.
-
-``` r
-library(forecast)
-```
-
-    ## Warning: package 'forecast' was built under R version 3.5.3
+R optimise le choix du meileur modèle avec la méthode ETS (`error, tend and seasonnal`). L’optimisation est lancée avec la fonction `ets()` du module `forecast`.
 
 ``` r
 hawai_ets <- hawai_ts_train %>%
                   ets() %>%         # enregistre le modèle
                   forecast()        # affiche la composante prévisionnelle
+```
+
+Pour afficher la prédiction :
+
+``` r
 hawai_ets %>% 
   autoplot()
 ```
 
-![](devoir5_zc_files/figure-markdown_github/unnamed-chunk-10-1.png)
+![](devoir5_zc_files/figure-markdown_github/unnamed-chunk-11-1.png)
+
+Une prédiction est faite possiblement de 1988 à 1990. Les données Test permettront d'etendre un peu plus cette plage de prédiction.
+
+On pourrait regarder les paramètres du modèle :
 
 ``` r
 hawai_ets$model$par
 ```
 
-    ##        alpha         beta        gamma          phi            l 
-    ## 6.453914e-01 3.455762e-02 1.001644e-04 9.762366e-01 3.146519e+02 
-    ##            b           s0           s1           s2           s3 
-    ## 1.204632e-01 1.001750e+00 9.998708e-01 9.972174e-01 9.939538e-01 
-    ##           s4           s5           s6           s7           s8 
-    ## 9.907436e-01 9.913121e-01 9.963918e-01 1.002291e+00 1.006830e+00 
-    ##           s9          s10 
-    ## 1.008582e+00 1.007118e+00
+    ##         alpha          beta         gamma             l             b 
+    ##  7.161484e-01  1.086551e-03  1.400553e-04  3.145679e+02  1.075629e-01 
+    ##            s0            s1            s2            s3            s4 
+    ##  5.791636e-01 -3.720418e-02 -9.174696e-01 -1.973954e+00 -3.033426e+00 
+    ##            s5            s6            s7            s8            s9 
+    ## -2.868235e+00 -1.178724e+00  7.324790e-01  2.222816e+00  2.825109e+00 
+    ##           s10 
+    ##  2.351379e+00
 
 ### 3.2 Projeter la prévision de CO2 atmosphérique pour comparer aux données test
 
-Les données test partent du mois d'octobre 1988 au mois de décembre 2001 soit 13 périodes de 12 mois plus 3 mois. Faisons la projection sur 13 périodes de 12 mois (`12*13`).
+Faisons la projection sur 13 périodes de 12 mois (`12*13`) correspondant à la plage des données Test.
 
 ``` r
 hawai_ets <- hawai_ts_train %>%
                   ets() %>% 
                   forecast(h = 12*13)
+```
+
+La visualisation graphique donne cette fois :
+
+``` r
 hawai_ets %>% 
   autoplot()
 ```
 
-![](devoir5_zc_files/figure-markdown_github/unnamed-chunk-12-1.png)
+![](devoir5_zc_files/figure-markdown_github/unnamed-chunk-14-1.png)
 
 ### 4. Effectuer une analyse des résidus
 
@@ -312,23 +374,23 @@ hawai_ets %>%
   checkresiduals()
 ```
 
-![](devoir5_zc_files/figure-markdown_github/unnamed-chunk-13-1.png)
+![](devoir5_zc_files/figure-markdown_github/unnamed-chunk-15-1.png)
 
     ## 
     ##  Ljung-Box test
     ## 
-    ## data:  Residuals from ETS(M,Ad,M)
-    ## Q* = 46.726, df = 7, p-value = 6.311e-08
+    ## data:  Residuals from ETS(A,A,A)
+    ## Q* = 44.698, df = 8, p-value = 4.198e-07
     ## 
-    ## Model df: 17.   Total lags used: 24
+    ## Model df: 16.   Total lags used: 24
 
 La p-value du `Ljung-Box test` (&lt;&lt;&lt; 0.05) montre qu'il y a des tendances dans les données. Il est peu probable que les résidus aient été générés par un bruit blanc, indiquant qu’il existe une structure dans les données qui n’a pas été capturée par le modèle.
 
-### 5. Commenter: le modèle est-il fiable ? Comment pourrait-il être amélioré ?
+### 5. Commenter : le modèle est-il fiable ? Comment pourrait-il être amélioré ?
 
 ``` r
 hawai_arima <- hawai_ts_train %>% auto.arima()
 hawai_arima %>% forecast(h=12*13) %>% autoplot()
 ```
 
-![](devoir5_zc_files/figure-markdown_github/unnamed-chunk-14-1.png)
+![](devoir5_zc_files/figure-markdown_github/unnamed-chunk-16-1.png)

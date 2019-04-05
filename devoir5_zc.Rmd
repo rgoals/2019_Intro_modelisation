@@ -9,27 +9,27 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Petites astuces
+## Petites astuces pour la pratique
 
-Le YAML (ci-dessus), c'est l'information qui permettra d'exporter le document.
+Le YAML en haut dans le code Marckdown, est l'information qui permettra d'exporter le document.
 
 Mettre du texte en *italique*.
 
 Ce texte est en **gras**.
 
-L'ordre des titres selon le nombre de carrés.
+Comment formater les titres selon le nombre de carrés.
 
 Texte en `largeur fixe`.
 
-Insérrer un bloc de code `ctrl+alt+i`.
+Insérrer rapidement un bloc de code `ctrl+alt+i`.
 
-Insérrer une équation seule, l'encadrer par 2$ avant et 2$ après. Dans un paragraphe, seulement par un $. Les équation utilise le `Latin`:
+Insérrer une équation comme paragraphe : l'encadrer par 2$ avant et 2$ après. Mais à l'intérieur du paragraphe, seulement par un $ de part et d'autre. Les équations utilise le `Latin`.
 
 $$ \alpha = \frac{a}{b^2} $$
 
-L'Équation dans le paragraphe est $c^2 = a^2 + b^3$ et c'est même très beau à voir. La racine carrée est donc $\sqrt{a^2 + b^3}$.
+Juste pour tenter par moi-même une équation dans le paragraphe, écrivons $c^2 = a^2 + b^3$. Géniale !. La racine carrée s'écrit $\sqrt{a^2 + b^3}$.
 
-
+Des codes utiles : 
 - `{r, filtre-outliers}` donne le nom `filtre-outliers` au bloc de code, qui permet nommément de nommer les images créer dans le bloc de code.
 
 - `{r, eval = FALSE, include = FALSE}` permet d’activer (`TRUE`, valeur par défaut) ou de désactiver (`FALSE`) le calcul de la cellule, puis inclure ou ne pas inclure ...
@@ -42,26 +42,29 @@ L'Équation dans le paragraphe est $c^2 = a^2 + b^3$ et c'est même très beau �
 
 - `{r, fig.width = 10, fig.height = 5, fig.align = "center"}` affichera les graphiques dans les dimensions voulues, alignée au centre (`"center"`), à gauche (`"left"`) ou à droite (`"right"`).
 
-On peut également exécuter rapidement du code sur une ligne avec la formulation `r`, par exemple la moyenne des nombres `\r a<-round(runif(4, 0, 10)); a` est de `\r mean(a)`, en enlevant les `\` devant les r (ajoutées artificiellement pour éviter que le code soit calculé) sera la moyenne des nombres 7, 2, 2, 8 est de 4.75
+Mais se référer de préférence à l'[aide-mémoire](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet) Marckdown pour plus de détails ou le langage Marckdown [ici](https://daringfireball.net/projects/markdown/basics).
+
+On peut également exécuter rapidement du code sur une ligne avec la formulation `r`, par exemple la moyenne des nombres `\r a<-round(runif(4, 0, 10)); a` est de `\r mean(a)`, en enlevant les `\` devant les r (ajoutées artificiellement pour éviter que le code soit calculé) qui affichera en sortie :
 
 La moyenne des nombres `r a <- round(runif(4, 0, 10)); a` est de `r mean(a)`.
 
 
 ## Charger le fichier de travail
 
-```{r, results=FALSE}
+Après toutes ces digressions personnelle pour implémenter certains aspects fascinants de cet interface, je reviens aux moutons à l'ordre du jour. Chargeons les données à étudier.
+
+```{r}
 library(tidyverse)
 hawai <- read_csv("hawai.csv")
 ```
 
-
 ## Directives de l’évaluation
 	
-Les données du fichier `hawai.csv` comprennent les moyennes des mesures mensuelles de **CO2 atmosphérique** en ppm-volume collectées au Mauna Loa Observatory à Hawaii de mars 1958 à juillet 2001, inclusivement.
+Les données du fichier `hawai.csv` comprennent les moyennes des mesures mensuelles de **CO2 atmosphérique** en ppm-volume collectées au Mauna-Loa Observatory à Hawaii de mars 1958 à juillet 2001, inclusivement.
 
-## Trvail à faire
+## Travail à faire
 
-Votre travail consiste à :
+Le travail consiste à :
 
 1. créer une série temporelle du CO2 à partir des données de hawai.csv
 
@@ -71,23 +74,29 @@ Votre travail consiste à :
 
 4. effectuer une analyse des résidus
 
-5. commenter: le modèle est-il fiable ? Comment pourrait-il être amélioré ?
+5. commenter : le modèle est-il fiable ? Comment pourrait-il être amélioré ?
 
-Vous devez me remettre un lien vers un répertoire git de votre choix (GitHub, GitLab, etc.) comprenant un code reproductible de votre démarche en format R-markdown.
-
-## Prediction avec des séries temporelles
-
-```{r}
-str(hawai)
-```
+Enfin, le travail est remis sous forme de lien vers un répertoire git (GitHub, GitLab, etc.) comprenant un code reproductible de votre démarche en format R-markdown.
 
 ## Résolution
 
 ### 1. Créer une série temporelle du CO2 à partir des données de hawai.csv
 
-La fonction `read_csv()` n'a pas reconnu la variable `time` directement comme une date mais plutôt une variable numérique. Il faut alors pouvoir passer à une variable sous forme de date. 
+Exploration des données :
 
-Le format `ts` pour `time series` permis par la fonction `ts()` du package `lubridate` n'a pas besoin du format de date. On ne garde que le vecteur ou la matrice temporelle `(excluant la date: time)`, on spécifie l'unité temporelle (l'année) et la sous-unité (le mois) de départ (ici l'année), puis à spécifier combien il y a de sous-unité par unité. La série temporelle `hawai_ts` est:
+```{r}
+str(hawai)
+```
+
+La fonction `read_csv()` n'a pas reconnu la variable `time` directement comme une date mais plutôt une variable numérique. On serait tenté de la transformer en format date. Mais la fonction `ts()` du module `lubridate`, qui crée un objet de classe `ts`, n'a pas forcément besoin du format date. 
+
+```{r}
+library(forecast)
+```
+
+Il faut garder que le vecteur ou la matrice temporelle `(excluant la date: time)` puis spécifier l'unité temporelle (ici l'année) et la sous-unité (le mois) de départ, et combien il y a de sous-unités par unité temporelle (ici 12 mois). 
+
+La série temporelle `hawai_ts` devient :
 
 ```{r}
 hawai_ts <- ts(hawai$CO2,         # le vecteur (cible)
@@ -98,49 +107,68 @@ sample(hawai_ts, 10)
 
 ### 2. Séparer la série en parties d'entraînement (environ 70% des données) et en partie test
 
+Après une exploration du dataframe, la série commence en mars 1958 et termine en décembre 2001. Voyons s'il peut être affiché entièrement :
+
 ```{r}
-hawai$time[round(0.7*nrow(hawai))]-1/365.25
+hawai_ts
 ```
 
+Tentons ce code pour trouver l'année et le mois où le partitionnement en Train et Test sets devrait s'arrêter :
+
 ```{r}
-hawai$time[round(0.7*nrow(hawai))]-1/365.25
+hawai$time[round(0.7*nrow(hawai))]
 ```
 
-
+Ce qui correspond au mois de septembre 1988. Nous pouvons partitionner en utilisant cette date comme ci-dessous :
 
 ```{r}
-hawai_ts_train <- window(hawai_ts, 
+hawai_ts_train1 <- window(hawai_ts, 
                          start = 1958, 
-                         end = hawai$time[round(0.7*nrow(hawai))]-1/365.25,
+                         end = hawai$time[round(0.7*nrow(hawai))],
                          freq = 12)
-hawai_ts_test <- window(hawai_ts, 
+hawai_ts_test1 <- window(hawai_ts, 
                         start = hawai$time[round(0.7*nrow(hawai))],
                         freq = 12)
 ```
 
+Ou bien partitionner jusqu'en décembre 1988 (3 mois de plus), juste pour que les données Test restent sur 12*13 (13 périodes de 12 mois). Y'aurait-il autre moyen de pouvoir appeler les 3 mois restant dans le `forecast(h= ...)` ? J'ai opté de les ajouter aux données d'entraînement.
+
 ```{r}
-hawai_ts_train
+hawai_ts_train <- window(hawai_ts, 
+                         start = 1958, 
+                         end = 1988,
+                         freq = 12)
+hawai_ts_test <- window(hawai_ts, 
+                        start = 1989,
+                        freq = 12)
 ```
 
+On pourrait visualiser le succès du partitionnement en appelant par exemple les données Test :
 
 ```{r}
 hawai_ts_test
 ```
 
 ### 3.1 Créer un modèle ETS sur les données d'entraînement
-On peut laisser R optimiser le choix avec un modèle avec ETS (`error, tend and seasonnal`). L’optimisation est lancée avec la fonction `ets()` du module `forecast`.
 
-```{r}
-library(forecast)
-```
+R optimise le choix du meileur modèle avec la méthode ETS (`error, tend and seasonnal`). L’optimisation est lancée avec la fonction `ets()` du module `forecast`.
 
 ```{r}
 hawai_ets <- hawai_ts_train %>%
                   ets() %>%         # enregistre le modèle
                   forecast()        # affiche la composante prévisionnelle
+```
+
+Pour afficher la prédiction :
+
+```{r}
 hawai_ets %>% 
   autoplot()
 ```
+
+Une prédiction est faite possiblement de 1988 à 1990. Les données Test permettront d'etendre un peu plus cette plage de prédiction.
+
+On pourrait regarder les paramètres du modèle :
 
 ```{r}
 hawai_ets$model$par
@@ -148,15 +176,22 @@ hawai_ets$model$par
 
 ### 3.2 Projeter la prévision de CO2 atmosphérique pour comparer aux données test
 
-Les données test partent du mois d'octobre 1988 au mois de décembre 2001 soit 13 périodes de 12 mois plus 3 mois. Faisons la projection sur 13 périodes de 12 mois (`12*13`).
+Faisons la projection sur 13 périodes de 12 mois (`12*13`) correspondant à la plage des données Test.
 
 ```{r}
 hawai_ets <- hawai_ts_train %>%
                   ets() %>% 
                   forecast(h = 12*13)
+```
+
+La visualisation graphique donne cette fois :
+
+```{r}
 hawai_ets %>% 
   autoplot()
 ```
+
+
 
 ### 4. Effectuer une analyse des résidus
 
@@ -168,7 +203,7 @@ hawai_ets %>%
 
 La p-value du `Ljung-Box test` (<<< 0.05) montre qu'il y a des tendances dans les données. Il est peu probable que les résidus aient été générés par un bruit blanc, indiquant qu’il existe une structure dans les données qui n’a pas été capturée par le modèle.
 
-### 5. Commenter: le modèle est-il fiable ? Comment pourrait-il être amélioré ?
+### 5. Commenter : le modèle est-il fiable ? Comment pourrait-il être amélioré ?
 
 ```{r}
 hawai_arima <- hawai_ts_train %>% auto.arima()
