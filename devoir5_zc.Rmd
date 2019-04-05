@@ -5,12 +5,59 @@ date: "`r format(Sys.Date())`"
 output: github_document
 ---
 
+## Petites astuces
+
+Le YAML (ci-dessus), c'est l'information qui permettra d'exporter le document.
+
+Mettre du texte en *italique*.
+
+Ce texte est en **gras**.
+
+L'ordre des titres selon le nombre de carrés.
+
+Texte en `largeur fixe`.
+
+Insérrer un bloc de code `ctrl+alt+i`.
+
+Insérrer une équation seule, l'encadrer par 2$ avant et 2$ après. Dans un paragraphe, seulement par un $. Les équation utilise le `Latin`:
+
+$$ \alpha = \frac{a}{b^2} $$
+
+L'Équation dans le paragraphe est $c^2 = a^2 + b^3$ et c'est même très beau à voir. La racine carrée est donc $\sqrt{a^2 + b^3}$.
+
+
+- `{r, filtre-outliers}` donne le nom `filtre-outliers` au bloc de code, qui permet nommément de nommer les images créer dans le bloc de code.
+
+- `{r, eval = FALSE, include = FALSE}` permet d’activer (`TRUE`, valeur par défaut) ou de désactiver (`FALSE`) le calcul de la cellule, puis inclure ou ne pas inclure ...
+
+- `{r, echo = FALSE}` permet de n’afficher que la sortie de la cellule de code en n’affichant pas le code, par exemple un graphique ou le sommaire d’une régression.
+
+- `{r, results = FALSE}` permet de n’afficher que le code, mais pas la sortie.
+
+- `{r, warning = FALSE, message = FALSE, error = FALSE}` n’affichera pas les avertissements, les messages automatiques et les messages d’erreur.
+
+- `{r, fig.width = 10, fig.height = 5, fig.align = "center"}` affichera les graphiques dans les dimensions voulues, alignée au centre (`"center"`), à gauche (`"left"`) ou à droite (`"right"`).
+
+On peut également exécuter rapidement du code sur une ligne avec la formulation `r`, par exemple la moyenne des nombres `\r a<-round(runif(4, 0, 10)); a` est de `\r mean(a)`, en enlevant les `\` devant les r (ajoutées artificiellement pour éviter que le code soit calculé) sera la moyenne des nombres 7, 2, 2, 8 est de 4.75
+
+La moyenne des nombres `r a <- round(runif(4, 0, 10)); a` est de `r mean(a)`.
+
+
+## Charger le fichier de travail
+
+```{r, results=FALSE}
+library(tidyverse)
+hawai <- read_csv("hawai.csv")
+```
+
+
 ## Directives de l’évaluation
 	
-
 Les données du fichier `hawai.csv` comprennent les moyennes des mesures mensuelles de **CO2 atmosphérique** en ppm-volume collectées au Mauna Loa Observatory à Hawaii de mars 1958 à juillet 2001, inclusivement.
 
-Votre travail consiste à:
+## Trvail à faire
+
+Votre travail consiste à :
 
 1. créer une série temporelle du CO2 à partir des données de hawai.csv
 2. séparer la série en parties d'entraînement (environ 70% des données) et en partie test
@@ -30,22 +77,3 @@ Vous devez me remettre un lien vers un répertoire git de votre choix (GitHub, G
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdo
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
