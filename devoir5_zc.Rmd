@@ -82,7 +82,8 @@ str(hawai)
 ```
 
 ## Résolution
-### 1. créer une série temporelle du CO2 à partir des données de hawai.csv
+
+### 1. Créer une série temporelle du CO2 à partir des données de hawai.csv
 
 La fonction `read_csv()` n'a pas reconnu la variable `time` directement comme une date mais plutôt une variable numérique. Il faut alors pouvoir passer à une variable sous forme de date. 
 
@@ -95,7 +96,7 @@ hawai_ts <- ts(hawai$CO2,         # le vecteur (cible)
 sample(hawai_ts, 10)
 ```
 
-### 2. séparer la série en parties d'entraînement (environ 70% des données) et en partie test
+### 2. Séparer la série en parties d'entraînement (environ 70% des données) et en partie test
 
 ```{r}
 hawai$time[round(0.7*nrow(hawai))]-1/365.25
@@ -145,15 +146,6 @@ hawai_ets %>%
 hawai_ets$model$par
 ```
 
-
-
-```{r}
-hawai_ets %>% 
-  checkresiduals()
-```
-
-La p-value du `Ljung-Box test` montre qu'il y a des tendances dans les données.
-
 ### 3.2 Projeter la prévision de CO2 atmosphérique pour comparer aux données test
 
 Les données test partent du mois d'octobre 1988 au mois de décembre 2001 soit 13 périodes de 12 mois plus 3 mois. Faisons la projection sur 13 périodes de 12 mois (`12*13`).
@@ -166,9 +158,23 @@ hawai_ets %>%
   autoplot()
 ```
 
+### 4. Effectuer une analyse des résidus
 
 
+```{r}
+hawai_ets %>% 
+  checkresiduals()
+```
 
+La p-value du `Ljung-Box test` (<<< 0.05) montre qu'il y a des tendances dans les données. Il est peu probable que les résidus aient été générés par un bruit blanc, indiquant qu’il existe une structure dans les données qui n’a pas été capturée par le modèle.
+
+### 5. Commenter: le modèle est-il fiable ? Comment pourrait-il être amélioré ?
+
+```{r}
+hawai_arima <- hawai_ts_train %>% auto.arima()
+hawai_arima %>% forecast(h=12*13) %>% autoplot()
+```
+ 
 
 
 

@@ -38,7 +38,7 @@ L'Équation dans le paragraphe est *c*<sup>2</sup> = *a*<sup>2</sup> + *
 
 On peut également exécuter rapidement du code sur une ligne avec la formulation `r`, par exemple la moyenne des nombres `\r a<-round(runif(4, 0, 10)); a` est de `\r mean(a)`, en enlevant les `\` devant les r (ajoutées artificiellement pour éviter que le code soit calculé) sera la moyenne des nombres 7, 2, 2, 8 est de 4.75
 
-La moyenne des nombres 4, 2, 4, 6 est de 4.
+La moyenne des nombres 3, 6, 8, 8 est de 6.25.
 
 Charger le fichier de travail
 -----------------------------
@@ -47,14 +47,14 @@ Charger le fichier de travail
 library(tidyverse)
 ```
 
-    ## -- Attaching packages ----------------------------------------------------- tidyverse 1.2.1 --
+    ## -- Attaching packages -------------------------------------------------------------------- tidyverse 1.2.1 --
 
     ## v ggplot2 3.1.0     v purrr   0.2.5
     ## v tibble  1.4.2     v dplyr   0.7.8
     ## v tidyr   0.8.2     v stringr 1.3.1
     ## v readr   1.3.1     v forcats 0.3.0
 
-    ## -- Conflicts -------------------------------------------------------- tidyverse_conflicts() --
+    ## -- Conflicts ----------------------------------------------------------------------- tidyverse_conflicts() --
     ## x dplyr::filter() masks stats::filter()
     ## x dplyr::lag()    masks stats::lag()
 
@@ -109,7 +109,7 @@ str(hawai)
 Résolution
 ----------
 
-### 1. créer une série temporelle du CO2 à partir des données de hawai.csv
+### 1. Créer une série temporelle du CO2 à partir des données de hawai.csv
 
 La fonction `read_csv()` n'a pas reconnu la variable `time` directement comme une date mais plutôt une variable numérique. Il faut alors pouvoir passer à une variable sous forme de date.
 
@@ -122,10 +122,10 @@ hawai_ts <- ts(hawai$CO2,         # le vecteur (cible)
 sample(hawai_ts, 10)
 ```
 
-    ##  [1] 351.200 347.400 359.500 318.725 367.880 336.700 314.875 362.460
-    ##  [9] 366.540 324.280
+    ##  [1] 346.825 350.080 337.950 355.360 336.675 354.060 331.500 358.900
+    ##  [9] 322.100 355.350
 
-### 2. séparer la série en parties d'entraînement (environ 70% des données) et en partie test
+### 2. Séparer la série en parties d'entraînement (environ 70% des données) et en partie test
 
 ``` r
 hawai$time[round(0.7*nrow(hawai))]-1/365.25
@@ -291,23 +291,6 @@ hawai_ets$model$par
     ##           s9          s10 
     ## 1.008582e+00 1.007118e+00
 
-``` r
-hawai_ets %>% 
-  checkresiduals()
-```
-
-![](devoir5_zc_files/figure-markdown_github/unnamed-chunk-12-1.png)
-
-    ## 
-    ##  Ljung-Box test
-    ## 
-    ## data:  Residuals from ETS(M,Ad,M)
-    ## Q* = 46.726, df = 7, p-value = 6.311e-08
-    ## 
-    ## Model df: 17.   Total lags used: 24
-
-La p-value du `Ljung-Box test` montre qu'il y a des tendances dans les données.
-
 ### 3.2 Projeter la prévision de CO2 atmosphérique pour comparer aux données test
 
 Les données test partent du mois d'octobre 1988 au mois de décembre 2001 soit 13 périodes de 12 mois plus 3 mois. Faisons la projection sur 13 périodes de 12 mois (`12*13`).
@@ -320,4 +303,32 @@ hawai_ets %>%
   autoplot()
 ```
 
+![](devoir5_zc_files/figure-markdown_github/unnamed-chunk-12-1.png)
+
+### 4. Effectuer une analyse des résidus
+
+``` r
+hawai_ets %>% 
+  checkresiduals()
+```
+
 ![](devoir5_zc_files/figure-markdown_github/unnamed-chunk-13-1.png)
+
+    ## 
+    ##  Ljung-Box test
+    ## 
+    ## data:  Residuals from ETS(M,Ad,M)
+    ## Q* = 46.726, df = 7, p-value = 6.311e-08
+    ## 
+    ## Model df: 17.   Total lags used: 24
+
+La p-value du `Ljung-Box test` (&lt;&lt;&lt; 0.05) montre qu'il y a des tendances dans les données. Il est peu probable que les résidus aient été générés par un bruit blanc, indiquant qu’il existe une structure dans les données qui n’a pas été capturée par le modèle.
+
+### 5. Commenter: le modèle est-il fiable ? Comment pourrait-il être amélioré ?
+
+``` r
+hawai_arima <- hawai_ts_train %>% auto.arima()
+hawai_arima %>% forecast(h=12*13) %>% autoplot()
+```
+
+![](devoir5_zc_files/figure-markdown_github/unnamed-chunk-14-1.png)
