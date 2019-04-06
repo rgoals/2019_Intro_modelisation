@@ -42,7 +42,7 @@ Exploration des données :
 str(hawai)
 ```
 
-La fonction `read_csv()` n'a pas reconnu la variable `time` directement comme une date mais plutôt une variable numérique. On serait tenté de la transformer en format date. Mais la fonction `ts()` du module `lubridate`, qui crée un objet de classe `ts`, n'a pas forcément besoin du format date. 
+La fonction `read_csv()` n'a pas reconnu la variable `time` directement comme une date mais plutôt une variable numérique. On serait tenté de la transformer en format date. Mais la fonction `ts()` du module `lubridate`, qui crée un objet de format `ts`, sans forcément besoin du format date. 
 
 ```{r}
 library(forecast)

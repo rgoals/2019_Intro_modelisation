@@ -73,7 +73,7 @@ str(hawai)
     ##   ..   CO2 = col_double()
     ##   .. )
 
-La fonction `read_csv()` n'a pas reconnu la variable `time` directement comme une date mais plutôt une variable numérique. On serait tenté de la transformer en format date. Mais la fonction `ts()` du module `lubridate`, qui crée un objet de classe `ts`, n'a pas forcément besoin du format date.
+La fonction `read_csv()` n'a pas reconnu la variable `time` directement comme une date mais plutôt une variable numérique. On serait tenté de la transformer en format date. Mais la fonction `ts()` du module `lubridate`, qui crée un objet de format `ts`, sans forcément besoin du format date.
 
 ``` r
 library(forecast)
@@ -92,8 +92,8 @@ hawai_ts <- ts(hawai$CO2,         # le vecteur (cible)
 sample(hawai_ts, 10)
 ```
 
-    ##  [1] 322.060 373.800 355.925 356.080 329.220 320.450 330.625 347.925
-    ##  [9] 333.425 337.525
+    ##  [1] 355.350 320.250 368.850 324.975 346.440 368.750 358.320 364.560
+    ##  [9] 348.750 332.550
 
 ### 2. Séparer la série en parties d'entraînement (environ 70% des données) et en partie test
 
