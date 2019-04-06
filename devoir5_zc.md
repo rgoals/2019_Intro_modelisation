@@ -3,49 +3,33 @@ Introduction à la plateforme GitHub
 zcoulibali
 2019-04-05
 
-Petites astuces pour la pratique
---------------------------------
+Directives de l’évaluation
+--------------------------
 
-Le YAML en haut dans le code Marckdown, est l'information qui permettra d'exporter le document.
+Les données du fichier `hawai.csv` comprennent les moyennes des mesures mensuelles de **CO2 atmosphérique** en ppm-volume collectées au Mauna-Loa Observatory à Hawaii de mars 1958 à juillet 2001, inclusivement.
 
-Mettre du texte en *italique*.
+Travail à faire
+---------------
 
-Ce texte est en **gras**.
+Le travail consiste à :
 
-Comment formater les titres selon le nombre de carrés.
+1.  créer une série temporelle du CO2 à partir des données de hawai.csv
 
-Texte en `largeur fixe`.
+2.  séparer la série en parties d'entraînement (environ 70% des données) et en partie test
 
-Insérrer rapidement un bloc de code `ctrl+alt+i`.
+3.  créer un modèle ETS sur les données d'entraînement, puis projeter la prévision de CO2 atmosphérique pour comparer aux données test
 
-Insérrer une équation comme paragraphe : l'encadrer par 2$ avant et 2$ après. Mais à l'intérieur du paragraphe, seulement par un $ de part et d'autre. Les équations utilise le `Latin`.
+4.  effectuer une analyse des résidus
 
-$$ \\alpha = \\frac{a}{b^2} $$
+5.  commenter : le modèle est-il fiable ? Comment pourrait-il être amélioré ?
 
-Juste pour tenter par moi-même une équation dans le paragraphe, écrivons *c*<sup>2</sup> = *a*<sup>2</sup> + *b*<sup>3</sup>. Géniale !. La racine carrée s'écrit $\\sqrt{a^2 + b^3}$.
+Enfin, le travail est remis sous forme de lien vers un répertoire git (GitHub, GitLab, etc.) comprenant un code reproductible de votre démarche en format R-markdown.
 
-Des codes utiles : - `{r, filtre-outliers}` donne le nom `filtre-outliers` au bloc de code, qui permet nommément de nommer les images créer dans le bloc de code.
-
--   `{r, eval = FALSE, include = FALSE}` permet d’activer (`TRUE`, valeur par défaut) ou de désactiver (`FALSE`) le calcul de la cellule, puis inclure ou ne pas inclure ...
-
--   `{r, echo = FALSE}` permet de n’afficher que la sortie de la cellule de code en n’affichant pas le code, par exemple un graphique ou le sommaire d’une régression.
-
--   `{r, results = FALSE}` permet de n’afficher que le code, mais pas la sortie.
-
--   `{r, warning = FALSE, message = FALSE, error = FALSE}` n’affichera pas les avertissements, les messages automatiques et les messages d’erreur.
-
--   `{r, fig.width = 10, fig.height = 5, fig.align = "center"}` affichera les graphiques dans les dimensions voulues, alignée au centre (`"center"`), à gauche (`"left"`) ou à droite (`"right"`).
-
-Mais se référer de préférence à l'[aide-mémoire](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet) Marckdown pour plus de détails ou le langage Marckdown [ici](https://daringfireball.net/projects/markdown/basics).
-
-On peut également exécuter rapidement du code sur une ligne avec la formulation `r`, par exemple la moyenne des nombres `\r a<-round(runif(4, 0, 10)); a` est de `\r mean(a)`, en enlevant les `\` devant les r (ajoutées artificiellement pour éviter que le code soit calculé) qui affichera en sortie :
-
-La moyenne des nombres 10, 8, 10, 8 est de 9.
+Résolution
+----------
 
 Charger le fichier de travail
 -----------------------------
-
-Après toutes ces digressions personnelle pour implémenter certains aspects fascinants de cet interface, je reviens aux moutons à l'ordre du jour. Chargeons les données à étudier.
 
 ``` r
 library(tidyverse)
@@ -71,31 +55,6 @@ hawai <- read_csv("hawai.csv")
     ##   time = col_double(),
     ##   CO2 = col_double()
     ## )
-
-Directives de l’évaluation
---------------------------
-
-Les données du fichier `hawai.csv` comprennent les moyennes des mesures mensuelles de **CO2 atmosphérique** en ppm-volume collectées au Mauna-Loa Observatory à Hawaii de mars 1958 à juillet 2001, inclusivement.
-
-Travail à faire
----------------
-
-Le travail consiste à :
-
-1.  créer une série temporelle du CO2 à partir des données de hawai.csv
-
-2.  séparer la série en parties d'entraînement (environ 70% des données) et en partie test
-
-3.  créer un modèle ETS sur les données d'entraînement, puis projeter la prévision de CO2 atmosphérique pour comparer aux données test
-
-4.  effectuer une analyse des résidus
-
-5.  commenter : le modèle est-il fiable ? Comment pourrait-il être amélioré ?
-
-Enfin, le travail est remis sous forme de lien vers un répertoire git (GitHub, GitLab, etc.) comprenant un code reproductible de votre démarche en format R-markdown.
-
-Résolution
-----------
 
 ### 1. Créer une série temporelle du CO2 à partir des données de hawai.csv
 
@@ -133,8 +92,8 @@ hawai_ts <- ts(hawai$CO2,         # le vecteur (cible)
 sample(hawai_ts, 10)
 ```
 
-    ##  [1] 330.000 322.100 336.600 354.140 324.825 340.020 357.575 331.800
-    ##  [9] 320.450 321.320
+    ##  [1] 322.060 373.800 355.925 356.080 329.220 320.450 330.625 347.925
+    ##  [9] 333.425 337.525
 
 ### 2. Séparer la série en parties d'entraînement (environ 70% des données) et en partie test
 
@@ -243,10 +202,10 @@ hawai$time[round(0.7*nrow(hawai))]
 
     ## [1] 1988.75
 
-Ce qui correspond au mois de septembre 1988. Nous pouvons partitionner en utilisant cette date comme ci-dessous :
+Ce qui correspond au mois de septembre 1988. Nous pouvons donc partitionner en utilisant cette date comme limite de partitionnement :
 
 ``` r
-hawai_ts_train1 <- window(hawai_ts, 
+hawai_ts_train <- window(hawai_ts, 
                          start = 1958, 
                          end = hawai$time[round(0.7*nrow(hawai))],
                          freq = 12)
@@ -255,25 +214,8 @@ hawai_ts_train1 <- window(hawai_ts,
     ## Warning in window.default(x, ...): 'start' value not changed
 
 ``` r
-hawai_ts_test1 <- window(hawai_ts, 
-                        start = hawai$time[round(0.7*nrow(hawai))],
-                        freq = 12)
-```
-
-Ou bien partitionner jusqu'en décembre 1988 (3 mois de plus), juste pour que les données Test restent sur 12\*13 (13 périodes de 12 mois). Y'aurait-il autre moyen de pouvoir appeler les 3 mois restant dans le `forecast(h= ...)` ? J'ai opté de les ajouter aux données d'entraînement.
-
-``` r
-hawai_ts_train <- window(hawai_ts, 
-                         start = 1958, 
-                         end = 1988,
-                         freq = 12)
-```
-
-    ## Warning in window.default(x, ...): 'start' value not changed
-
-``` r
 hawai_ts_test <- window(hawai_ts, 
-                        start = 1989,
+                        start = hawai$time[round(0.7*nrow(hawai))],
                         freq = 12)
 ```
 
@@ -284,6 +226,7 @@ hawai_ts_test
 ```
 
     ##          Jan     Feb     Mar     Apr     May     Jun     Jul     Aug
+    ## 1988                                                                
     ## 1989 352.775 353.000 353.600 355.360 355.600 355.125 353.860 351.575
     ## 1990 353.650 354.650 355.480 356.175 357.075 356.080 354.675 352.900
     ## 1991 354.675 355.650 357.200 358.600 359.250 358.180 356.050 353.860
@@ -298,6 +241,7 @@ hawai_ts_test
     ## 2000 369.020 369.375 370.400 371.540 371.650 371.625 369.940 367.950
     ## 2001 370.175 371.325 372.060 372.775 373.800 373.060 371.300 369.425
     ##          Sep     Oct     Nov     Dec
+    ## 1988         348.960 350.000 351.360
     ## 1989 349.860 350.050 351.200 352.480
     ## 1990 350.940 351.225 352.700 354.140
     ## 1991 352.125 352.250 353.740 355.025
@@ -311,6 +255,8 @@ hawai_ts_test
     ## 1999 364.675 365.140 366.650 367.900
     ## 2000 366.540 366.725 368.125 369.440
     ## 2001 367.880 368.050 369.375 371.020
+
+Il reste ainsi 13 années fois 12 mois plus 3 mois soit h = 159 pour les données Test.
 
 ### 3.1 Créer un modèle ETS sur les données d'entraînement
 
@@ -326,12 +272,12 @@ Pour afficher la prédiction :
 
 ``` r
 hawai_ets %>% 
-  autoplot()
+  autoplot() + labs(x = "Année", y = "Concentration CO2")
 ```
 
-![](devoir5_zc_files/figure-markdown_github/unnamed-chunk-11-1.png)
+![](devoir5_zc_files/figure-markdown_github/unnamed-chunk-10-1.png)
 
-Une prédiction est faite possiblement de 1988 à 1990. Les données Test permettront d'etendre un peu plus cette plage de prédiction.
+Une prédiction est faite possiblement de 1988 à 1990. Les données Test permettront d'étendre un peu plus cette plage de prédiction.
 
 On pourrait regarder les paramètres du modèle :
 
@@ -340,32 +286,45 @@ hawai_ets$model$par
 ```
 
     ##         alpha          beta         gamma             l             b 
-    ##  7.161484e-01  1.086551e-03  1.400553e-04  3.145679e+02  1.075629e-01 
+    ##  6.802687e-01  2.259570e-03  1.015036e-04  3.145366e+02  1.126940e-01 
     ##            s0            s1            s2            s3            s4 
-    ##  5.791636e-01 -3.720418e-02 -9.174696e-01 -1.973954e+00 -3.033426e+00 
+    ##  5.563618e-01 -8.727554e-02 -9.497972e-01 -2.004136e+00 -3.056502e+00 
     ##            s5            s6            s7            s8            s9 
-    ## -2.868235e+00 -1.178724e+00  7.324790e-01  2.222816e+00  2.825109e+00 
+    ## -2.878968e+00 -1.183077e+00  7.839500e-01  2.259468e+00  2.856629e+00 
     ##           s10 
-    ##  2.351379e+00
+    ##  2.384125e+00
 
 ### 3.2 Projeter la prévision de CO2 atmosphérique pour comparer aux données test
 
-Faisons la projection sur 13 périodes de 12 mois (`12*13`) correspondant à la plage des données Test.
+Faisons la projection sur une période de 159 mois correspondant à la plage des données Test.
 
 ``` r
 hawai_ets <- hawai_ts_train %>%
                   ets() %>% 
-                  forecast(h = 12*13)
+                  forecast(h = 159)
 ```
 
 La visualisation graphique donne cette fois :
 
 ``` r
 hawai_ets %>% 
-  autoplot()
+  autoplot() + labs(x = "Année", y = "Concentration CO2")
 ```
 
-![](devoir5_zc_files/figure-markdown_github/unnamed-chunk-14-1.png)
+![](devoir5_zc_files/figure-markdown_github/unnamed-chunk-13-1.png)
+
+L’évaluation du modèle peut être effectuée avec la fonction `forecast::accuracy()` qui détecte automatiquement la série d’entraînement et la série de test si on lui fournit la série entière `hawi_ts`.
+
+``` r
+accuracy(hawai_ets, hawai_ts)
+```
+
+    ##                        ME     RMSE       MAE          MPE       MAPE
+    ## Training set -0.001062961 0.330219 0.2482782 -0.000786347 0.07547246
+    ## Test set      0.370393661 1.149941 0.8916896  0.098447563 0.24472812
+    ##                   MASE       ACF1 Theil's U
+    ## Training set 0.2032564 0.05170149        NA
+    ## Test set     0.7299939 0.94392537 0.8938207
 
 ### 4. Effectuer une analyse des résidus
 
@@ -380,17 +339,38 @@ hawai_ets %>%
     ##  Ljung-Box test
     ## 
     ## data:  Residuals from ETS(A,A,A)
-    ## Q* = 44.698, df = 8, p-value = 4.198e-07
+    ## Q* = 45.022, df = 8, p-value = 3.645e-07
     ## 
     ## Model df: 16.   Total lags used: 24
 
+### 5. Commenter : le modèle est-il fiable ? Comment pourrait-il être amélioré ?
+
 La p-value du `Ljung-Box test` (&lt;&lt;&lt; 0.05) montre qu'il y a des tendances dans les données. Il est peu probable que les résidus aient été générés par un bruit blanc, indiquant qu’il existe une structure dans les données qui n’a pas été capturée par le modèle.
 
-### 5. Commenter : le modèle est-il fiable ? Comment pourrait-il être amélioré ?
+On pourrait tester le modèle ARIMA et apprecier l'amélioration éventuelle apportée.
 
 ``` r
 hawai_arima <- hawai_ts_train %>% auto.arima()
-hawai_arima %>% forecast(h=12*13) %>% autoplot()
+
+hawai_arima %>% forecast(h=159) %>% 
+                      autoplot() + labs(x = "Année", y = "Concentration CO2")
 ```
 
 ![](devoir5_zc_files/figure-markdown_github/unnamed-chunk-16-1.png)
+
+``` r
+hawai_arima %>%
+  checkresiduals()
+```
+
+![](devoir5_zc_files/figure-markdown_github/unnamed-chunk-17-1.png)
+
+    ## 
+    ##  Ljung-Box test
+    ## 
+    ## data:  Residuals from ARIMA(1,1,1)(2,1,2)[12]
+    ## Q* = 20.545, df = 18, p-value = 0.303
+    ## 
+    ## Model df: 6.   Total lags used: 24
+
+Avec une p-value de 30.3%, le Ljung-Box test montre également que ce modéle serait meilleur que le modèle ETS.
