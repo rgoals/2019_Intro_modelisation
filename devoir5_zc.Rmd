@@ -5,19 +5,19 @@ date: "`r format(Sys.Date())`"
 output: github_document
 ---
 
+# Exemple à travers le devoir 5
+
 ## Directives de l’évaluation
 	
-Les données du fichier `hawai.csv` comprennent les moyennes des mesures mensuelles de **CO2 atmosphérique** en ppm-volume collectées au Mauna-Loa Observatory à Hawaii de mars 1958 à juillet 2001, inclusivement.
-
-## Travail à faire
+Les données du fichier `hawai.csv` comprennent les moyennes des mesures mensuelles de **CO~2~ atmosphérique** en ppm-volume collectées au Mauna-Loa Observatory à Hawaii de mars 1958 à juillet 2001, inclusivement.
 
 Le travail consiste à :
 
-1. créer une série temporelle du CO2 à partir des données de hawai.csv
+1. créer une série temporelle du CO~2~ à partir des données de hawai.csv
 
 2. séparer la série en parties d'entraînement (environ 70% des données) et en partie test
 
-3. créer un modèle ETS sur les données d'entraînement, puis projeter la prévision de CO2 atmosphérique pour comparer aux données test
+3. créer un modèle ETS sur les données d'entraînement, puis projeter la prévision de CO~2~ atmosphérique pour comparer aux données test
 
 4. effectuer une analyse des résidus
 
@@ -27,14 +27,14 @@ Enfin, le travail est remis sous forme de lien vers un répertoire git (GitHub, 
 
 ## Résolution
 
-## Charger le fichier de travail
+### Charger le fichier de travail
 
 ```{r}
 library(tidyverse)
 hawai <- read_csv("hawai.csv")
 ```
 
-### 1. Créer une série temporelle du CO2 à partir des données de hawai.csv
+### Créer une série temporelle du CO~2~ à partir des données de hawai.csv
 
 Exploration des données :
 
@@ -59,7 +59,7 @@ hawai_ts <- ts(hawai$CO2,         # le vecteur (cible)
 sample(hawai_ts, 10)
 ```
 
-### 2. Séparer la série en parties d'entraînement (environ 70% des données) et en partie test
+### Séparer la série en parties d'entraînement (environ 70% des données) et en partie test
 
 Après une exploration du dataframe, la série commence en mars 1958 et termine en décembre 2001. Voyons s'il peut être affiché entièrement :
 
@@ -94,7 +94,7 @@ hawai_ts_test
 
 Il reste ainsi 13 années fois 12 mois plus 3 mois soit h = 159 pour les données Test.
 
-### 3.1 Créer un modèle ETS sur les données d'entraînement
+### Créer un modèle ETS sur les données d'entraînement
 
 R optimise le choix du meileur modèle avec la méthode ETS (`error, tend and seasonnal`). L’optimisation est lancée avec la fonction `ets()` du module `forecast`.
 
@@ -119,7 +119,7 @@ On pourrait regarder les paramètres du modèle :
 hawai_ets$model$par
 ```
 
-### 3.2 Projeter la prévision de CO2 atmosphérique pour comparer aux données test
+### Projeter la prévision de CO2 atmosphérique pour comparer aux données test
 
 Faisons la projection sur une période de 159 mois correspondant à la plage des données Test.
 
@@ -142,14 +142,14 @@ L’évaluation du modèle peut être effectuée avec la fonction `forecast::acc
 accuracy(hawai_ets, hawai_ts)
 ```
 
-### 4. Effectuer une analyse des résidus
+### Effectuer une analyse des résidus
 
 ```{r}
 hawai_ets %>% 
   checkresiduals()
 ```
 
-### 5. Commenter : le modèle est-il fiable ? Comment pourrait-il être amélioré ?
+### Commenter : le modèle est-il fiable ? Comment pourrait-il être amélioré ?
 
 La p-value du `Ljung-Box test` (<<< 0.05) montre qu'il y a des tendances dans les données. Il est peu probable que les résidus aient été générés par un bruit blanc, indiquant qu’il existe une structure dans les données qui n’a pas été capturée par le modèle.
 
@@ -169,7 +169,4 @@ hawai_arima %>%
 ```
  
 Avec une p-value de 30.3%, le Ljung-Box test montre également que ce modéle serait meilleur que le modèle ETS.
-
-
-
 

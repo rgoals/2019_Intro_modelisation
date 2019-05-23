@@ -1,23 +1,23 @@
 Introduction à la plateforme GitHub
 ================
 zcoulibali
-2019-04-05
+2019-04-07
+
+Exemple à travers le devoir 5
+=============================
 
 Directives de l’évaluation
 --------------------------
 
-Les données du fichier `hawai.csv` comprennent les moyennes des mesures mensuelles de **CO2 atmosphérique** en ppm-volume collectées au Mauna-Loa Observatory à Hawaii de mars 1958 à juillet 2001, inclusivement.
-
-Travail à faire
----------------
+Les données du fichier `hawai.csv` comprennent les moyennes des mesures mensuelles de **CO<sub>2</sub> atmosphérique** en ppm-volume collectées au Mauna-Loa Observatory à Hawaii de mars 1958 à juillet 2001, inclusivement.
 
 Le travail consiste à :
 
-1.  créer une série temporelle du CO2 à partir des données de hawai.csv
+1.  créer une série temporelle du CO<sub>2</sub> à partir des données de hawai.csv
 
 2.  séparer la série en parties d'entraînement (environ 70% des données) et en partie test
 
-3.  créer un modèle ETS sur les données d'entraînement, puis projeter la prévision de CO2 atmosphérique pour comparer aux données test
+3.  créer un modèle ETS sur les données d'entraînement, puis projeter la prévision de CO<sub>2</sub> atmosphérique pour comparer aux données test
 
 4.  effectuer une analyse des résidus
 
@@ -28,21 +28,20 @@ Enfin, le travail est remis sous forme de lien vers un répertoire git (GitHub, 
 Résolution
 ----------
 
-Charger le fichier de travail
------------------------------
+### Charger le fichier de travail
 
 ``` r
 library(tidyverse)
 ```
 
-    ## -- Attaching packages -------------------------------------------------------------------- tidyverse 1.2.1 --
+    ## -- Attaching packages ----------------------------------------------------------------------------------------------- tidyverse 1.2.1 --
 
     ## v ggplot2 3.1.0     v purrr   0.2.5
     ## v tibble  1.4.2     v dplyr   0.7.8
     ## v tidyr   0.8.2     v stringr 1.3.1
     ## v readr   1.3.1     v forcats 0.3.0
 
-    ## -- Conflicts ----------------------------------------------------------------------- tidyverse_conflicts() --
+    ## -- Conflicts -------------------------------------------------------------------------------------------------- tidyverse_conflicts() --
     ## x dplyr::filter() masks stats::filter()
     ## x dplyr::lag()    masks stats::lag()
 
@@ -56,7 +55,7 @@ hawai <- read_csv("hawai.csv")
     ##   CO2 = col_double()
     ## )
 
-### 1. Créer une série temporelle du CO2 à partir des données de hawai.csv
+### Créer une série temporelle du CO<sub>2</sub> à partir des données de hawai.csv
 
 Exploration des données :
 
@@ -92,10 +91,10 @@ hawai_ts <- ts(hawai$CO2,         # le vecteur (cible)
 sample(hawai_ts, 10)
 ```
 
-    ##  [1] 355.350 320.250 368.850 324.975 346.440 368.750 358.320 364.560
-    ##  [9] 348.750 332.550
+    ##  [1] 316.050 318.625 322.100 316.975 337.600 350.050 365.340 345.575
+    ##  [9] 348.960 359.125
 
-### 2. Séparer la série en parties d'entraînement (environ 70% des données) et en partie test
+### Séparer la série en parties d'entraînement (environ 70% des données) et en partie test
 
 Après une exploration du dataframe, la série commence en mars 1958 et termine en décembre 2001. Voyons s'il peut être affiché entièrement :
 
@@ -258,7 +257,7 @@ hawai_ts_test
 
 Il reste ainsi 13 années fois 12 mois plus 3 mois soit h = 159 pour les données Test.
 
-### 3.1 Créer un modèle ETS sur les données d'entraînement
+### Créer un modèle ETS sur les données d'entraînement
 
 R optimise le choix du meileur modèle avec la méthode ETS (`error, tend and seasonnal`). L’optimisation est lancée avec la fonction `ets()` du module `forecast`.
 
@@ -294,7 +293,7 @@ hawai_ets$model$par
     ##           s10 
     ##  2.384125e+00
 
-### 3.2 Projeter la prévision de CO2 atmosphérique pour comparer aux données test
+### Projeter la prévision de CO2 atmosphérique pour comparer aux données test
 
 Faisons la projection sur une période de 159 mois correspondant à la plage des données Test.
 
@@ -326,7 +325,7 @@ accuracy(hawai_ets, hawai_ts)
     ## Training set 0.2032564 0.05170149        NA
     ## Test set     0.7299939 0.94392537 0.8938207
 
-### 4. Effectuer une analyse des résidus
+### Effectuer une analyse des résidus
 
 ``` r
 hawai_ets %>% 
@@ -343,7 +342,7 @@ hawai_ets %>%
     ## 
     ## Model df: 16.   Total lags used: 24
 
-### 5. Commenter : le modèle est-il fiable ? Comment pourrait-il être amélioré ?
+### Commenter : le modèle est-il fiable ? Comment pourrait-il être amélioré ?
 
 La p-value du `Ljung-Box test` (&lt;&lt;&lt; 0.05) montre qu'il y a des tendances dans les données. Il est peu probable que les résidus aient été générés par un bruit blanc, indiquant qu’il existe une structure dans les données qui n’a pas été capturée par le modèle.
 
